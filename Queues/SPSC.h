@@ -2,18 +2,6 @@
 #include "../allocator/slab_allocator.h"
 #include "../common/common_headers.h"
 #include "../common/macros.h"
-// Starting SPSC queue
-
-//->WILL CONTAIN
-// it will contain just a raw array of pointers T*[]
-// SlabAlloc object
-// will allocate using the specialized SlabAlloc
-// head pointer which will be atomic
-// tail pointer which will be atomic
-// capacity
-// size
-
-//-> FUNCTION
 
 namespace tstl {
     template<typename T, std::size_t SIZE = 1024, class Allocator = SlabAlloc<T, SIZE>>
