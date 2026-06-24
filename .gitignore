@@ -1,0 +1,166 @@
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# CLion project files
+.idea/
+*.iml
+cmake-build-*/
+cmake-build-*/*
+
+# CMake
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+Makefile
+CMakeUserPresets.json
+
+# Build directories
+build/
+Debug/
+Release/
+x64/
+x86/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# CTest
+CTestTestfile.cmake
+Testing/
+
+# Eclipse CDT
+.cproject
+.project
+
+# Visual Studio Code
+.vscode/
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*~
+*.swp
+*.swo
+*#
+
+# Backup files
+*.bak
+*.backup
+*.orig
+*.save
+
+# Logs
+*.log
+
+# Profiling data
+*.gcda
+*.gcno
+*.gcov
+
+# Coverage data
+*.gcov
+*.lcov
+
+# Dependency files
+*.d
+
+# CTest results
+test-results.xml
+junit*.xml
+
+# Package files
+*.deb
+*.rpm
+*.tar.gz
+*.zip
+
+# User-specific files
+.viminfo
+.nfs*
+.metadata/
+
+# CLion specific
+.idea/
+*.iml
+cmake-build-*/
+cmake-build-*/*
+!cmake-build-debug/working  # Keep executable if needed
+!cmake-build-release/working
+
+# CLion workspace
+workspace.xml
+
+# CLion run configurations
+*.run.xml
+
+# CLion remote development
+.remote/
+
+# CLion dataSources
+dataSources/
+dataSources.local.xml
+
+# CLion dictionaries
+dictionaries/
+
+# CLion shelf
+shelf/
+
+# CLion file watchers
+watcherTasks.xml
+
+# CLion misc
+*.iws
+
+# Memory dump files
+*.heap
+*.core
+
+# Temporary CMake files
+/_deps/
+/.cmake/
+
+DesignDocs/
