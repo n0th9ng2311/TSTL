@@ -9,6 +9,10 @@ include("/init.cmake" OPTIONAL)
 
 add_library(TSTL_P STATIC
         allocator/slab_allocator.h
-        "common/common_headers.h"
+        common/common_headers.h
         Queues/SPSC.h
-        common/macros.h)
+        common/macros.h
+        Queues/SPSC_A.h)
+
+
+set_target_properties(TSTL_P PROPERTIES LINKER_LANGUAGE CXX)
