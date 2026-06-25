@@ -29,4 +29,9 @@ if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
+option(BUILD_BENCHMARKS "Build the benchmark suite" ON)
+if(BUILD_BENCHMARKS)
+    add_subdirectory(benchmarks)
+endif()
+
 set_target_properties(TSTL_P PROPERTIES LINKER_LANGUAGE CXX)
