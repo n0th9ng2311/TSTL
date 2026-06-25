@@ -1,6 +1,7 @@
 #define ANKERL_NANOBENCH_IMPLEMENT
 #include <nanobench.h>
 #include "../../Queues/SPSC.h"
+#include "../../Queues/SPSC_A.h"
 
 int main() {
     ankerl::nanobench::Bench bench;
