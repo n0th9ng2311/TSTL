@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.1)
+cmake_minimum_required(VERSION 3.24)
 project(TSTL_P LANGUAGES CXX)
 
 if(WIN32 AND MINGW)
@@ -8,8 +8,13 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-file(TO_CMAKE_PATH "{MY_UTILS}" UTILS_DIR)
-include("/init.cmake" OPTIONAL)
+
+file(TO_CMAKE_PATH "$ENV{MY_UTILS}" UTILS_DIR)
+if(EXISTS "${UTILS_DIR}/init.cmake")
+    include("${UTILS_DIR}/init.cmake")
+elseif(EXISTS "/init.cmake")
+    include("/init.cmake" OPTIONAL)
+endif()
 
 
 add_library(TSTL_P STATIC
@@ -25,13 +30,13 @@ target_include_directories(TSTL_P PUBLIC
         $<INSTALL_INTERFACE:include>
 )
 
-option(BUILD_TESTING "Build the test suite" ON)
+option(TSTL_BUILD_TESTING "Build the test suite" OFF)
 if(BUILD_TESTING)
     enable_testing()
     add_subdirectory(tests)
 endif()
 
-option(BUILD_BENCHMARKS "Build the benchmark suite" ON)
+option(TSTL_BUILD_BENCHMARKS "Build the benchmark suite" OFF)
 if(BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()

@@ -5,11 +5,11 @@
 
 namespace tstl {
     template<typename T, std::size_t SIZE = 1024, class Allocator = void>
-    requires (std::is_nothrow_move_constructible_v<T>)
+        requires(std::is_nothrow_move_constructible_v<T>)
     class SPSC {
         static_assert((SIZE & (SIZE - 1)) == 0, "SPSC SIZE must be a power of 2");
 
-        //inline storage slot that prevents default construction
+        // inline storage slot that prevents default construction
         struct Slot {
             alignas(T) std::byte storage[sizeof(T)];
         };
@@ -18,7 +18,8 @@ namespace tstl {
         SPSC() = default;
 
         ~SPSC() {
-            while (try_pop().has_value()) {}
+            while (try_pop().has_value()) {
+            }
         }
 
         SPSC(const SPSC &) = delete;
@@ -40,7 +41,7 @@ namespace tstl {
 
             const std::size_t slot = current_write & (SIZE - 1);
 
-            T* item = reinterpret_cast<T*>(&m_data[slot].storage);
+            T *item = reinterpret_cast<T *>(&m_data[slot].storage);
             std::construct_at(item, std::forward<Args>(args)...);
 
             write_head.store(current_write + 1, std::memory_order_release);
@@ -60,7 +61,7 @@ namespace tstl {
 
             const std::size_t slot = current_read & (SIZE - 1);
 
-            T* item = reinterpret_cast<T*>(&m_data[slot].storage);
+            T *item = reinterpret_cast<T *>(&m_data[slot].storage);
             T result = std::move(*item);
 
             std::destroy_at(item);

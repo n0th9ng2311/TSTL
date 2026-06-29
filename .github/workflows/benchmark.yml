@@ -1,0 +1,47 @@
+name: TSTL Perf Benchmarks
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Sunday at midnight
+  workflow_dispatch:
+
+jobs:
+  profile-performance:
+    name: Micro-Benchmarks Execution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Toolchain & Ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y g++-14
+
+      - name: Configure Benchmark Targets
+        run: |
+          cmake -G Ninja -B build-bench \
+            -DCMAKE_CXX_COMPILER=g++-14 \
+            -DCMAKE_CXX_STANDARD=23 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DTSTL_BUILD_BENCHMARKS=ON \
+            -DTSTL_BUILD_TESTS=OFF
+
+      - name: Compile Performance Benchmarks
+        run: cmake --build build-bench --parallel $(nproc)
+
+      - name: Execute Benchmarks
+        working-directory: build-bench
+        run: |
+          # Assumes benchmark executables generate inside your build structure
+          if [ -d "benchmarks" ]; then
+            cd benchmarks
+            for bench in ./*benchmark*; do
+              if [ -x "$bench" ]; then
+                echo "Running Performance Profile: $bench"
+                "$bench"
+              fi
+            done
+          fi

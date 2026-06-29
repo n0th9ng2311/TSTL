@@ -1,15 +1,15 @@
 #include <gtest/gtest.h>
-#include "../../common/common_headers.h"
 #include "../../Queues/SPSC.h"
 #include "../../Queues/SPSC_A.h"
+#include "../../common/common_headers.h"
 
-template <typename ConcreteQueue, typename Element>
+template<typename ConcreteQueue, typename Element>
 struct TestBundle {
     using FabricatedQueue = ConcreteQueue;
     using ElementType = Element;
 };
 
-//generates dynamic payload data across tests
+// generates dynamic payload data across tests
 template<typename T>
 T GeneratePayload(size_t index) {
     static_assert(std::is_arithmetic_v<T> || std::is_same_v<T, std::string>);
@@ -24,7 +24,7 @@ T GeneratePayload(size_t index) {
 
 /// BASIC LOGIC AND WRAPAROUND TESTS \\\
 
-template <typename Bundle>
+template<typename Bundle>
 class SPSC_basic_pattern : public ::testing::Test {
 protected:
     typename Bundle::FabricatedQueue queue;
@@ -84,14 +84,12 @@ TYPED_TEST_P(SPSC_basic_pattern, WrapAroundChasing) {
     EXPECT_FALSE(this->queue.try_pop().has_value());
 }
 
-REGISTER_TYPED_TEST_SUITE_P(SPSC_basic_pattern,
-    EmptyStateTest, SinglePushPopTest, FullBoundaryTest, WrapAroundChasing);
-
+REGISTER_TYPED_TEST_SUITE_P(SPSC_basic_pattern, EmptyStateTest, SinglePushPopTest, FullBoundaryTest, WrapAroundChasing);
 
 
 /// MOVE ONLY TYPES TEST \\\
 
-template <typename Bundle>
+template<typename Bundle>
 class SPSC_move_pattern : public ::testing::Test {
 protected:
     typename Bundle::FabricatedQueue queue;
@@ -124,7 +122,7 @@ REGISTER_TYPED_TEST_SUITE_P(SPSC_move_pattern, UniqPtrEmplaceTest);
 
 /// CONC TEST \\\
 
-template <typename Bundle>
+template<typename Bundle>
 class SPSC_conc_pattern : public ::testing::Test {
 protected:
     typename Bundle::FabricatedQueue queue;
@@ -162,52 +160,39 @@ TYPED_TEST_P(SPSC_conc_pattern, SeqIntegrityTest) {
 REGISTER_TYPED_TEST_SUITE_P(SPSC_conc_pattern, SeqIntegrityTest);
 
 
-//SPSC test inst
-using SPSC_Basic_Instances = ::testing::Types<
-    TestBundle<tstl::SPSC<int, 16>, int>,
-    TestBundle<tstl::SPSC<double, 16>, double>,
-    TestBundle<tstl::SPSC<char, 16>, char>,
-    TestBundle<tstl::SPSC<std::string, 16>, std::string>
->;
+// SPSC test inst
+using SPSC_Basic_Instances =
+        ::testing::Types<TestBundle<tstl::SPSC<int, 16>, int>, TestBundle<tstl::SPSC<double, 16>, double>,
+                         TestBundle<tstl::SPSC<char, 16>, char>, TestBundle<tstl::SPSC<std::string, 16>, std::string>>;
 
-using SPSC_Move_Instances = ::testing::Types<
-    TestBundle<tstl::SPSC<std::unique_ptr<int>, 16>, int>,
-    TestBundle<tstl::SPSC<std::unique_ptr<double>, 16>, double>,
-    TestBundle<tstl::SPSC<std::unique_ptr<std::string>, 16>, std::string>
->;
+using SPSC_Move_Instances = ::testing::Types<TestBundle<tstl::SPSC<std::unique_ptr<int>, 16>, int>,
+                                             TestBundle<tstl::SPSC<std::unique_ptr<double>, 16>, double>,
+                                             TestBundle<tstl::SPSC<std::unique_ptr<std::string>, 16>, std::string>>;
 
-using SPSC_Conc_Instances = ::testing::Types<
-    TestBundle<tstl::SPSC<int, 1024>, int>,
-    TestBundle<tstl::SPSC<double, 1024>, double>,
-    TestBundle<tstl::SPSC<char, 1024>, char>,
-    TestBundle<tstl::SPSC<std::string, 1024>, std::string>
->;
+using SPSC_Conc_Instances =
+        ::testing::Types<TestBundle<tstl::SPSC<int, 1024>, int>, TestBundle<tstl::SPSC<double, 1024>, double>,
+                         TestBundle<tstl::SPSC<char, 1024>, char>,
+                         TestBundle<tstl::SPSC<std::string, 1024>, std::string>>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(SPSC_Original, SPSC_basic_pattern, SPSC_Basic_Instances);
 INSTANTIATE_TYPED_TEST_SUITE_P(SPSC_Original, SPSC_move_pattern, SPSC_Move_Instances);
 INSTANTIATE_TYPED_TEST_SUITE_P(SPSC_Original, SPSC_conc_pattern, SPSC_Conc_Instances);
 
 
-//SPSC_A test inst
-using SPSC_A_Basic_Instances = ::testing::Types<
-    TestBundle<tstl::SPSC_A<int, 16>, int>,
-    TestBundle<tstl::SPSC_A<double, 16>, double>,
-    TestBundle<tstl::SPSC_A<char, 16>, char>,
-    TestBundle<tstl::SPSC_A<std::string, 16>, std::string>
->;
+// SPSC_A test inst
+using SPSC_A_Basic_Instances =
+        ::testing::Types<TestBundle<tstl::SPSC_A<int, 16>, int>, TestBundle<tstl::SPSC_A<double, 16>, double>,
+                         TestBundle<tstl::SPSC_A<char, 16>, char>,
+                         TestBundle<tstl::SPSC_A<std::string, 16>, std::string>>;
 
-using SPSC_A_Move_Instances = ::testing::Types<
-    TestBundle<tstl::SPSC_A<std::unique_ptr<int>, 16>, int>,
-    TestBundle<tstl::SPSC_A<std::unique_ptr<double>, 16>, double>,
-    TestBundle<tstl::SPSC_A<std::unique_ptr<std::string>, 16>, std::string>
->;
+using SPSC_A_Move_Instances = ::testing::Types<TestBundle<tstl::SPSC_A<std::unique_ptr<int>, 16>, int>,
+                                               TestBundle<tstl::SPSC_A<std::unique_ptr<double>, 16>, double>,
+                                               TestBundle<tstl::SPSC_A<std::unique_ptr<std::string>, 16>, std::string>>;
 
-using SPSC_A_Conc_Instances = ::testing::Types<
-    TestBundle<tstl::SPSC_A<int, 1024>, int>,
-    TestBundle<tstl::SPSC_A<double, 1024>, double>,
-    TestBundle<tstl::SPSC_A<char, 1024>, char>,
-    TestBundle<tstl::SPSC_A<std::string, 1024>, std::string>
->;
+using SPSC_A_Conc_Instances =
+        ::testing::Types<TestBundle<tstl::SPSC_A<int, 1024>, int>, TestBundle<tstl::SPSC_A<double, 1024>, double>,
+                         TestBundle<tstl::SPSC_A<char, 1024>, char>,
+                         TestBundle<tstl::SPSC_A<std::string, 1024>, std::string>>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(SPSC_Allocated, SPSC_basic_pattern, SPSC_A_Basic_Instances);
 INSTANTIATE_TYPED_TEST_SUITE_P(SPSC_Allocated, SPSC_move_pattern, SPSC_A_Move_Instances);

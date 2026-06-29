@@ -1,16 +1,16 @@
 #pragma once
 
 
-#include <memory>
-#include <condition_variable>
-#include <optional>
-#include <iostream>
-#include <mutex>
-#include <cstddef>
 #include <algorithm>
+#include <array>
+#include <condition_variable>
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
-#include <array>
+#include <iostream>
+#include <memory>
+#include <mutex>
+#include <optional>
 #include <string>
 #include <thread>
 #include <type_traits>

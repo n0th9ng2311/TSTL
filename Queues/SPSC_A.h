@@ -5,7 +5,7 @@
 
 namespace tstl {
     template<typename T, std::size_t SIZE = 1024, class Allocator = SlabAlloc<T, SIZE>>
-    requires (std::is_nothrow_move_constructible_v<T>)
+        requires(std::is_nothrow_move_constructible_v<T>)
     class SPSC_A {
         // for fast bitwise masking
         static_assert((SIZE & (SIZE - 1)) == 0, "SPSC SIZE must be a power of 2");
@@ -18,7 +18,8 @@ namespace tstl {
         }
 
         ~SPSC_A() {
-            while (try_pop().has_value()) {}
+            while (try_pop().has_value()) {
+            }
         }
 
         // dont want to copy or move the queue (may add this facility later)
@@ -43,7 +44,8 @@ namespace tstl {
             // not using the internal allocate_shared here because it would again cause the compiler to emit a LOCK
             // instruction
             T *item = m_allocator->std_allocator().allocate(1);
-            if (!item) return false;
+            if (!item)
+                return false;
 
             std::construct_at(item, std::forward<Args>(args)...);
             m_data[current_write & (SIZE - 1)].store(item, std::memory_order_release);
@@ -61,7 +63,7 @@ namespace tstl {
             if (TSTL_UNLIKELY(current_read == cached_write_head)) {
                 cached_write_head = write_head.load(std::memory_order_acquire);
                 if (current_read == cached_write_head) {
-                    return std::nullopt; //queue is empty
+                    return std::nullopt; // queue is empty
                 }
             }
 
@@ -79,6 +81,7 @@ namespace tstl {
         }
 
         [[nodiscard]] static constexpr std::size_t capacity() noexcept { return SIZE; }
+
     private:
         std::array<std::atomic<T *>, SIZE> m_data;
         std::shared_ptr<Allocator> m_allocator{};
@@ -92,4 +95,3 @@ namespace tstl {
         size_t cached_write_head{0};
     };
 } // namespace tstl
-
