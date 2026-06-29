@@ -23,9 +23,9 @@ namespace detail {
 #if defined(__cpp_lib_hardware_interference_size)
     inline constexpr std::size_t CACHE_LINE_SIZE = std::hardware_destructive_interference_size;
 #elif defined(__aarch64__) || defined(_M_ARM64)
-    inline constexpr std::size_t CACHE_LINE_SIZE = 128; //Apple Silicon / Graviton
+    inline constexpr std::size_t CACHE_LINE_SIZE = 128; // Apple Silicon / Graviton
 #else
-    inline constexpr std::size_t CACHE_LINE_SIZE = 64;  //x86_64 / Default
+    inline constexpr std::size_t CACHE_LINE_SIZE = 64; // x86_64 / Default
 #endif
 } // namespace detail
 
@@ -168,7 +168,7 @@ namespace tstl {
         SlabAlloc() : m_available(SLAB_SIZE) {
             m_slots = new Slot[SLAB_SIZE];
             m_free_list = &m_slots[0];
-            for (u64 i {0}; i < SLAB_SIZE - 1; ++i)
+            for (u64 i{0}; i < SLAB_SIZE - 1; ++i)
                 m_slots[i].store_next(&m_slots[i + 1]);
             m_slots[SLAB_SIZE - 1].store_next(nullptr);
         }
