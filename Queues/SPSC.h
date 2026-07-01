@@ -82,4 +82,3 @@ namespace tstl::lockfree {
         std::size_t cached_write_head{0};
     };
 } // namespace tstl::lockfree
-
