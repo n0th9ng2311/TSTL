@@ -162,17 +162,17 @@ REGISTER_TYPED_TEST_SUITE_P(SPSC_conc_pattern, SeqIntegrityTest);
 
 // SPSC test inst
 using SPSC_Basic_Instances =
-        ::testing::Types<TestBundle<tstl::SPSC<int, 16>, int>, TestBundle<tstl::SPSC<double, 16>, double>,
-                         TestBundle<tstl::SPSC<char, 16>, char>, TestBundle<tstl::SPSC<std::string, 16>, std::string>>;
+        ::testing::Types<TestBundle<tstl::lockfree::SPSC<int, 16>, int>, TestBundle<tstl::lockfree::SPSC<double, 16>, double>,
+                         TestBundle<tstl::lockfree::SPSC<char, 16>, char>, TestBundle<tstl::lockfree::SPSC<std::string, 16>, std::string>>;
 
-using SPSC_Move_Instances = ::testing::Types<TestBundle<tstl::SPSC<std::unique_ptr<int>, 16>, int>,
-                                             TestBundle<tstl::SPSC<std::unique_ptr<double>, 16>, double>,
-                                             TestBundle<tstl::SPSC<std::unique_ptr<std::string>, 16>, std::string>>;
+using SPSC_Move_Instances = ::testing::Types<TestBundle<tstl::lockfree::SPSC<std::unique_ptr<int>, 16>, int>,
+                                             TestBundle<tstl::lockfree::SPSC<std::unique_ptr<double>, 16>, double>,
+                                             TestBundle<tstl::lockfree::SPSC<std::unique_ptr<std::string>, 16>, std::string>>;
 
 using SPSC_Conc_Instances =
-        ::testing::Types<TestBundle<tstl::SPSC<int, 1024>, int>, TestBundle<tstl::SPSC<double, 1024>, double>,
-                         TestBundle<tstl::SPSC<char, 1024>, char>,
-                         TestBundle<tstl::SPSC<std::string, 1024>, std::string>>;
+        ::testing::Types<TestBundle<tstl::lockfree::SPSC<int, 1024>, int>, TestBundle<tstl::lockfree::SPSC<double, 1024>, double>,
+                         TestBundle<tstl::lockfree::SPSC<char, 1024>, char>,
+                         TestBundle<tstl::lockfree::SPSC<std::string, 1024>, std::string>>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(SPSC_Original, SPSC_basic_pattern, SPSC_Basic_Instances);
 INSTANTIATE_TYPED_TEST_SUITE_P(SPSC_Original, SPSC_move_pattern, SPSC_Move_Instances);

@@ -1,9 +1,9 @@
 #pragma once
-#include "../allocator/slab_allocator.h"
 #include "../common/common_headers.h"
 #include "../common/macros.h"
 
-namespace tstl {
+
+namespace tstl::lockfree {
     template<typename T, std::size_t SIZE = 1024, class Allocator = void>
         requires(std::is_nothrow_move_constructible_v<T>)
     class SPSC {
@@ -30,7 +30,7 @@ namespace tstl {
 
         template<typename... Args>
         [[nodiscard]] bool try_emplace(Args &&...args) {
-            const size_t current_write = write_head.load(std::memory_order_relaxed);
+            const std::size_t current_write = write_head.load(std::memory_order_relaxed);
 
             if (TSTL_UNLIKELY(current_write - cached_read_head >= SIZE)) {
                 cached_read_head = read_head.load(std::memory_order_acquire);
@@ -50,7 +50,7 @@ namespace tstl {
         }
 
         [[nodiscard]] std::optional<T> try_pop() {
-            const size_t current_read = read_head.load(std::memory_order_relaxed);
+            const std::size_t current_read = read_head.load(std::memory_order_relaxed);
 
             if (TSTL_UNLIKELY(current_read == cached_write_head)) {
                 cached_write_head = write_head.load(std::memory_order_acquire);
@@ -75,10 +75,11 @@ namespace tstl {
     private:
         std::array<Slot, SIZE> m_data;
 
-        alignas(detail::CACHE_LINE_SIZE) std::atomic<size_t> write_head{};
-        size_t cached_read_head{0};
+        alignas(detail::CACHE_LINE_SIZE) std::atomic<std::size_t> write_head{};
+        std::size_t cached_read_head{0};
 
-        alignas(detail::CACHE_LINE_SIZE) std::atomic<size_t> read_head{};
-        size_t cached_write_head{0};
+        alignas(detail::CACHE_LINE_SIZE) std::atomic<std::size_t> read_head{};
+        std::size_t cached_write_head{0};
     };
-} // namespace tstl
+} // namespace tstl::lockfree
+
