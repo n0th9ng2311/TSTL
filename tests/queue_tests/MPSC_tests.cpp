@@ -110,7 +110,7 @@ TYPED_TEST_P(MPSC_move_pattern, UniqPtrEmplaceTest) {
     auto ptr = std::make_unique<T>(test_val);
 
     EXPECT_TRUE(this->queue.try_emplace(std::move(ptr)));
-    EXPECT_EQ(ptr, nullptr); //verifying that the owner gave up ownership
+    EXPECT_EQ(ptr, nullptr); // verifying that the owner gave up ownership
 
     auto result = this->queue.try_pop();
     EXPECT_TRUE(result.has_value());
@@ -139,7 +139,7 @@ protected:
 
 TYPED_TEST_SUITE_P(MPSC_conc_pattern);
 
-//testing the CAS try_emplace
+// testing the CAS try_emplace
 TYPED_TEST_P(MPSC_conc_pattern, MultiProducer_TryEmplace) {
     using T = typename TypeParam::ElementType;
     constexpr std::size_t NUM_PRODUCERS = 4;
@@ -168,14 +168,14 @@ TYPED_TEST_P(MPSC_conc_pattern, MultiProducer_TryEmplace) {
         }
     }
 
-    for (auto& prod : producers) {
+    for (auto &prod: producers) {
         prod.join();
     }
 
     EXPECT_EQ(consumed, TOTAL_ITEMS);
 }
 
-//testing the blocking emplace
+// testing the blocking emplace
 TYPED_TEST_P(MPSC_conc_pattern, MultiProducer_BlockingEmplace) {
     using T = typename TypeParam::ElementType;
     constexpr std::size_t NUM_PRODUCERS = 4;
@@ -201,7 +201,7 @@ TYPED_TEST_P(MPSC_conc_pattern, MultiProducer_BlockingEmplace) {
         }
     }
 
-    for (auto& prod : producers) {
+    for (auto &prod: producers) {
         prod.join();
     }
 
@@ -214,27 +214,22 @@ REGISTER_TYPED_TEST_SUITE_P(MPSC_conc_pattern, MultiProducer_TryEmplace, MultiPr
 /// Test Inst \\\
 
 // Basic Tests
-using MPSC_Basic_Instances = ::testing::Types<
-    TestBundle<tstl::lockfree::MPSC<int, 16>, int>,
-    TestBundle<tstl::lockfree::MPSC<double, 16>, double>,
-    TestBundle<tstl::lockfree::MPSC<char, 16>, char>,
-    TestBundle<tstl::lockfree::MPSC<std::string, 16>, std::string>
->;
+using MPSC_Basic_Instances = ::testing::Types<TestBundle<tstl::lockfree::MPSC<int, 16>, int>,
+                                              TestBundle<tstl::lockfree::MPSC<double, 16>, double>,
+                                              TestBundle<tstl::lockfree::MPSC<char, 16>, char>,
+                                              TestBundle<tstl::lockfree::MPSC<std::string, 16>, std::string>>;
 
 // Move-Only Tests
-using MPSC_Move_Instances = ::testing::Types<
-    TestBundle<tstl::lockfree::MPSC<std::unique_ptr<int>, 16>, int>,
-    TestBundle<tstl::lockfree::MPSC<std::unique_ptr<double>, 16>, double>,
-    TestBundle<tstl::lockfree::MPSC<std::unique_ptr<std::string>, 16>, std::string>
->;
+using MPSC_Move_Instances =
+        ::testing::Types<TestBundle<tstl::lockfree::MPSC<std::unique_ptr<int>, 16>, int>,
+                         TestBundle<tstl::lockfree::MPSC<std::unique_ptr<double>, 16>, double>,
+                         TestBundle<tstl::lockfree::MPSC<std::unique_ptr<std::string>, 16>, std::string>>;
 
 // Concurrency Tests (Larger Queue Size to absorb initial thread spikes)
-using MPSC_Conc_Instances = ::testing::Types<
-    TestBundle<tstl::lockfree::MPSC<int, 1024>, int>,
-    TestBundle<tstl::lockfree::MPSC<double, 1024>, double>,
-    TestBundle<tstl::lockfree::MPSC<char, 1024>, char>,
-    TestBundle<tstl::lockfree::MPSC<std::string, 1024>, std::string>
->;
+using MPSC_Conc_Instances = ::testing::Types<TestBundle<tstl::lockfree::MPSC<int, 1024>, int>,
+                                             TestBundle<tstl::lockfree::MPSC<double, 1024>, double>,
+                                             TestBundle<tstl::lockfree::MPSC<char, 1024>, char>,
+                                             TestBundle<tstl::lockfree::MPSC<std::string, 1024>, std::string>>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(MPSC_Queue, MPSC_basic_pattern, MPSC_Basic_Instances);
 INSTANTIATE_TYPED_TEST_SUITE_P(MPSC_Queue, MPSC_move_pattern, MPSC_Move_Instances);
