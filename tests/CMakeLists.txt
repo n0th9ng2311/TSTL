@@ -11,15 +11,25 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-add_executable(run_unit_tests queue_tests/SPSC_tests.cpp)
+include(GoogleTest)
 
-target_compile_features(run_unit_tests PRIVATE cxx_std_20)
-
-target_link_libraries(run_unit_tests
+#SPSC tests
+add_executable(run_spsc_tests queue_tests/SPSC_tests.cpp)
+target_compile_features(run_spsc_tests PRIVATE cxx_std_20)
+target_link_libraries(run_spsc_tests
         PRIVATE
         TSTL_P
         gtest_main
 )
+gtest_discover_tests(run_spsc_tests)
 
-include(GoogleTest)
-gtest_discover_tests(run_unit_tests)
+#MPSC tests
+add_executable(run_mpsc_tests queue_tests/MPSC_tests.cpp
+        queue_tests/MPSC_tests.cpp)
+target_compile_features(run_mpsc_tests PRIVATE cxx_std_20)
+target_link_libraries(run_mpsc_tests
+        PRIVATE
+        TSTL_P
+        gtest_main
+)
+gtest_discover_tests(run_mpsc_tests)

@@ -23,6 +23,7 @@ add_library(TSTL_P STATIC
         Queues/SPSC.h
         common/macros.h
         Queues/SPSC_A.h
+        Queues/MPSC.h
 )
 
 target_include_directories(TSTL_P PUBLIC
