@@ -10,7 +10,7 @@ namespace tstl::lockfree {
         static_assert((SIZE & (SIZE - 1)) == 0, "MPSC SIZE must be a power of 2");
 
         // slot also has to be aligned to cacheline size because for smaller types, multiple slots could fit inside one
-        // cache line this wil alter cause bouncing because of multiple producers trying to push values to adjacent
+        // cache line this will cause bouncing because of multiple producers trying to push values to adjacent
         // slots in same cacheline
         // Also initially I was using States like EMPTY and TAKEN to mark slots but, I found this better approach by
         // Dmitry Vyukov where we mark each index with a seq corresponding to it. (more about this in the blog)
@@ -18,16 +18,6 @@ namespace tstl::lockfree {
             std::atomic<std::size_t> sequence{0};
             alignas(T) std::byte storage[sizeof(T)]{};
         };
-
-
-        // This is the second version here the Slot is not padded therefore there will probably be cache line bouncing
-        // but on the padded version for 1024 elements we are going to exceed L1 cache storage which is also not good
-        // for now I will keep the padded version, will keep the version which performs the best after benchmarking
-        //  struct Slot {
-        //      std::atomic<std::size_t> sequence{0};
-        //      alignas(T) std::byte storage[sizeof(T)]{};
-        //  };
-
 
     public:
         MPSC() {

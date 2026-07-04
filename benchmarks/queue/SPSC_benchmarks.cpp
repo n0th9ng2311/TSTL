@@ -16,13 +16,13 @@ static void pin_thread(int core) {
 }
 
 //  Same-thread round-trip benchmarks
-//  (raw atomic + construct/destroy overhead; no cross core contention)
+// (raw atomic + construct/destroy overhead; no cross core contention)
 
 static void bench_same_thread(ankerl::nanobench::Bench &bench) {
     bench.title("Same-Thread Round-Trip (lower bound, no contention)");
 
     {
-        tstl::SPSC<int, 1024> queue;
+        tstl::lockfree::SPSC<int, 1024> queue;
         int val = 42;
         bench.run("SPSC    | same-thread | int   ", [&]() {
             BENCH_DO_NOT_OPTIMIZE(queue.try_emplace(val));
@@ -40,7 +40,7 @@ static void bench_same_thread(ankerl::nanobench::Bench &bench) {
     }
 
     {
-        tstl::SPSC<double, 1024> queue;
+        tstl::lockfree::SPSC<double, 1024> queue;
         double val = 3.14;
         bench.run("SPSC    | same-thread | double", [&]() {
             BENCH_DO_NOT_OPTIMIZE(queue.try_emplace(val));
@@ -58,7 +58,7 @@ static void bench_same_thread(ankerl::nanobench::Bench &bench) {
     }
 
     {
-        tstl::SPSC<std::string, 1024> queue;
+        tstl::lockfree::SPSC<std::string, 1024> queue;
         std::string val = "hello";
         bench.run("SPSC    | same-thread | string", [&]() {
             BENCH_DO_NOT_OPTIMIZE(queue.try_emplace(val));
@@ -148,13 +148,14 @@ static void bench_two_thread(ankerl::nanobench::Bench &bench) {
         }
         double err_pct = (EPOCHS > 1) ? (std::sqrt(var / (EPOCHS - 1)) / mean * 100.0) : 0.0;
 
-        std::printf("  %-42s  %8.2f ns/op  %8.0f op/s  err%%=%.1f%%  [min=%.1f max=%.1f]\n",
-            label, mean, 1e9 / mean, err_pct, mn, mx); //std::println still doesnt work well with all the compilers -_-(will update these later)
+        std::printf("  %-42s  %8.2f ns/op  %8.0f op/s  err%%=%.1f%%  [min=%.1f max=%.1f]\n", label, mean, 1e9 / mean,
+                    err_pct, mn,
+                    mx); // std::println still doesnt work well with all the compilers -_-(will update these later)
     };
 
     std::puts("\n--- int ---");
     run_epochs(
-            "SPSC    | two-thread | int   ", [] { return std::make_unique<tstl::SPSC<int, 1024>>(); },
+            "SPSC    | two-thread | int   ", [] { return std::make_unique<tstl::lockfree::SPSC<int, 1024>>(); },
             [](auto &q, std::size_t n) { return run_two_thread<int>(q, n); });
     run_epochs(
             "SPSC_A  | two-thread | int   ", [] { return std::make_unique<tstl::SPSC_A<int, 1024>>(); },
@@ -162,7 +163,7 @@ static void bench_two_thread(ankerl::nanobench::Bench &bench) {
 
     std::puts("\n--- double ---");
     run_epochs(
-            "SPSC    | two-thread | double", [] { return std::make_unique<tstl::SPSC<double, 1024>>(); },
+            "SPSC    | two-thread | double", [] { return std::make_unique<tstl::lockfree::SPSC<double, 1024>>(); },
             [](auto &q, std::size_t n) { return run_two_thread<double>(q, n); });
     run_epochs(
             "SPSC_A  | two-thread | double", [] { return std::make_unique<tstl::SPSC_A<double, 1024>>(); },
@@ -170,7 +171,7 @@ static void bench_two_thread(ankerl::nanobench::Bench &bench) {
 
     std::puts("\n--- string ---");
     run_epochs(
-            "SPSC    | two-thread | string", [] { return std::make_unique<tstl::SPSC<std::string, 1024>>(); },
+            "SPSC    | two-thread | string", [] { return std::make_unique<tstl::lockfree::SPSC<std::string, 1024>>(); },
             [](auto &q, std::size_t n) { return run_two_thread<std::string>(q, n); });
     run_epochs(
             "SPSC_A  | two-thread | string", [] { return std::make_unique<tstl::SPSC_A<std::string, 1024>>(); },
@@ -180,7 +181,7 @@ static void bench_two_thread(ankerl::nanobench::Bench &bench) {
 int main() {
     ankerl::nanobench::Bench bench;
     bench.performanceCounters(true);
-    bench.minEpochIterations(10854354);
+    bench.minEpochIterations(127816984);
 
     std::puts(" SECTION 1: Same-Thread Round-Trip");
     std::puts(" Lower bound — no cross-core cache contention");

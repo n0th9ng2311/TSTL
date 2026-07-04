@@ -18,3 +18,12 @@ target_link_libraries(run_benchmarks
         TSTL_P
         nanobench::nanobench
 )
+
+
+add_executable(run_mpsc_benchmarks queue/MPSC_benchmarks.cpp)
+target_link_libraries(run_mpsc_benchmarks
+        PRIVATE
+        TSTL_P
+        nanobench::nanobench
+)
+
