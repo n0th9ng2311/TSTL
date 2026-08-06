@@ -93,7 +93,7 @@ namespace tstl::locking {
 
         [[nodiscard]] static constexpr std::size_t capacity() noexcept { return SIZE; }
 
-        //just an approx may not be exact at or after the moment it is called
+        // just an approx may not be exact at or after the moment it is called
         [[nodiscard]] std::size_t size_approx() const noexcept {
             return m_write_head.load(std::memory_order_acquire) - m_read_head.load(std::memory_order_acquire);
         }

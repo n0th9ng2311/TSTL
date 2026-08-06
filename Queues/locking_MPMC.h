@@ -16,7 +16,7 @@ namespace tstl::locking {
     public:
         MPMC() = default;
 
-        //not thread safe, dont destroy queue while in use
+        // not thread safe, dont destroy queue while in use
         ~MPMC() {
             while (try_pop().has_value()) {
             }
@@ -45,7 +45,7 @@ namespace tstl::locking {
                 T *item = reinterpret_cast<T *>(&m_data[slot].storage);
                 std::construct_at(item, std::forward<Args>(args)...);
                 m_write_head.store(current_write + 1, std::memory_order_release);
-            } //release the mutex before notifying
+            } // release the mutex before notifying
             m_cv_not_empty.notify_one();
             return true;
         }
@@ -87,7 +87,7 @@ namespace tstl::locking {
                 result = std::move(*item);
                 std::destroy_at(item);
                 m_read_head.store(current_read + 1, std::memory_order_release);
-            }// release the mutex before notifying
+            } // release the mutex before notifying
             m_cv_not_full.notify_one();
             return result;
         }
@@ -114,7 +114,7 @@ namespace tstl::locking {
 
         [[nodiscard]] static constexpr std::size_t capacity() noexcept { return SIZE; }
 
-        //just an approx may not be exact at or after the moment it is called
+        // just an approx may not be exact at or after the moment it is called
         [[nodiscard]] std::size_t size_approx() const noexcept {
             return m_write_head.load(std::memory_order_acquire) - m_read_head.load(std::memory_order_acquire);
         }
@@ -122,13 +122,13 @@ namespace tstl::locking {
     private:
         alignas(detail::CACHE_LINE_SIZE) std::array<Slot, SIZE> m_data;
 
-        //producer's line
+        // producer's line
         alignas(detail::CACHE_LINE_SIZE) std::mutex m_write_mutex;
         std::condition_variable m_cv_not_full;
         std::atomic<std::size_t> m_write_head{0};
         std::size_t m_read_head_cache{0};
 
-        //consumer's line
+        // consumer's line
         alignas(detail::CACHE_LINE_SIZE) std::mutex m_read_mutex;
         std::condition_variable m_cv_not_empty;
         std::atomic<std::size_t> m_read_head{0};

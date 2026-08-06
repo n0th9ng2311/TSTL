@@ -1,20 +1,20 @@
 cmake_minimum_required(VERSION 3.24)
 project(TSTL_P LANGUAGES CXX)
 
-if(WIN32 AND MINGW)
+if (WIN32 AND MINGW)
     add_link_options(-static -static-libgcc -static-libstdc++)
-endif()
+endif ()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 file(TO_CMAKE_PATH "$ENV{MY_UTILS}" UTILS_DIR)
-if(EXISTS "${UTILS_DIR}/init.cmake")
+if (EXISTS "${UTILS_DIR}/init.cmake")
     include("${UTILS_DIR}/init.cmake")
-elseif(EXISTS "/init.cmake")
+elseif (EXISTS "/init.cmake")
     include("/init.cmake" OPTIONAL)
-endif()
+endif ()
 
 
 add_library(TSTL_P STATIC
@@ -37,14 +37,14 @@ target_include_directories(TSTL_P PUBLIC
 )
 
 option(TSTL_BUILD_TESTING "Build the test suite" OFF)
-if(BUILD_TESTING)
+if (BUILD_TESTING)
     enable_testing()
     add_subdirectory(tests)
-endif()
+endif ()
 
 option(TSTL_BUILD_BENCHMARKS "Build the benchmark suite" OFF)
-if(BUILD_BENCHMARKS)
+if (BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
-endif()
+endif ()
 
 set_target_properties(TSTL_P PROPERTIES LINKER_LANGUAGE CXX)

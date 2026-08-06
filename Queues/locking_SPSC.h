@@ -99,11 +99,11 @@ namespace tstl::locking {
     private:
         alignas(detail::CACHE_LINE_SIZE) std::array<Slot, SIZE> m_data;
 
-        //producer's line
+        // producer's line
         std::size_t m_write_head{0};
         std::size_t m_read_head{0};
 
-        //consumer's line
+        // consumer's line
         alignas(detail::CACHE_LINE_SIZE) mutable std::mutex m_mutex;
         std::condition_variable m_cv_not_empty;
         std::condition_variable m_cv_not_full;
