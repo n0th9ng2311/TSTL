@@ -46,9 +46,7 @@ namespace tstl::locking {
             }
             // notify under m_read_mutex so consumer's condvar predicate check and his notification are
             // mutually exclusive
-            {
-                std::lock_guard rlock(m_read_mutex);
-            }
+            { std::lock_guard rlock(m_read_mutex); }
             m_cv_not_empty.notify_one();
             return true;
         }
@@ -70,9 +68,7 @@ namespace tstl::locking {
                 m_write_head.store(cur + 1, std::memory_order_release);
             }
 
-            {
-                std::lock_guard rlock(m_read_mutex);
-            }
+            { std::lock_guard rlock(m_read_mutex); }
             m_cv_not_empty.notify_one();
         }
 
@@ -97,9 +93,7 @@ namespace tstl::locking {
 
             m_read_head.store(current_read + 1, std::memory_order_release);
 
-            {
-                std::lock_guard wlock(m_write_mutex);
-            }
+            { std::lock_guard wlock(m_write_mutex); }
             m_cv_not_full.notify_one();
             return result;
         }
