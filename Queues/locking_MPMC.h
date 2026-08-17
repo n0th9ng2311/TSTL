@@ -45,71 +45,92 @@ namespace tstl::locking {
                 T *item = reinterpret_cast<T *>(&m_data[slot].storage);
                 std::construct_at(item, std::forward<Args>(args)...);
                 m_write_head.store(current_write + 1, std::memory_order_release);
-            } // release the mutex before notifying
+
+            }
+
+            //notify under m_read_mutex so consumer's condvar predicate check and his notification are
+            //mutually exclusive
+            {
+                std::lock_guard rlock(m_read_mutex);
+            }
             m_cv_not_empty.notify_one();
             return true;
         }
 
         template<typename... Args>
         void emplace(Args &&...args) {
-            std::unique_lock lock(m_write_mutex);
-            m_cv_not_full.wait(lock, [this] {
-                m_read_head_cache = m_read_head.load(std::memory_order_acquire);
-                return m_write_head.load(std::memory_order_relaxed) - m_read_head_cache < SIZE;
-            });
+            {
+                std::unique_lock wlock(m_write_mutex);
+                m_cv_not_full.wait(wlock, [this] {
+                    m_read_head_cache = m_read_head.load(std::memory_order_relaxed);
+                    return m_write_head.load(std::memory_order_relaxed) - m_read_head_cache < SIZE;
+                });
 
-            const std::size_t current_write = m_write_head.load(std::memory_order_relaxed);
-            const std::size_t slot = current_write & (SIZE - 1);
-            T *item = reinterpret_cast<T *>(&m_data[slot].storage);
-            std::construct_at(item, std::forward<Args>(args)...);
-            m_write_head.store(current_write + 1, std::memory_order_release);
-            lock.unlock();
-
+                const std::size_t cur = m_write_head.load(std::memory_order_relaxed);
+                T *item = reinterpret_cast<T *>(&m_data[cur & (SIZE - 1)].storage);
+                std::construct_at(item, std::forward<Args>(args)...);
+                m_write_head.store(cur + 1, std::memory_order_release);
+            }
+            {
+                std::lock_guard rlock(m_read_mutex);
+            }
             m_cv_not_empty.notify_one();
         }
 
+        //non-blocking pop, returns nullopt if empty
+        //MPSC has single consumer so no contention on the read side
         [[nodiscard]] std::optional<T> try_pop() {
             std::optional<T> result;
             {
-                std::lock_guard lock(m_read_mutex);
+                std::lock_guard rlock(m_read_mutex);
 
-                const std::size_t current_read = m_read_head.load(std::memory_order_relaxed);
-
-                if (TSTL_UNLIKELY(current_read == m_write_head_cache)) {
+                const std::size_t cur = m_read_head.load(std::memory_order_relaxed);
+                if (TSTL_UNLIKELY(cur == m_write_head_cache)) {
                     m_write_head_cache = m_write_head.load(std::memory_order_acquire);
-                    if (current_read == m_write_head_cache) {
+                    if (cur == m_write_head_cache) {
                         return std::nullopt; // empty
                     }
                 }
 
-                const std::size_t slot = current_read & (SIZE - 1);
-                T *item = reinterpret_cast<T *>(&m_data[slot].storage);
+                T *item = reinterpret_cast<T *>(&m_data[cur & (SIZE - 1)].storage);
                 result = std::move(*item);
                 std::destroy_at(item);
-                m_read_head.store(current_read + 1, std::memory_order_release);
-            } // release the mutex before notifying
+                m_read_head.store(cur + 1, std::memory_order_release);
+            }
+
+            {
+                std::lock_guard wlock(m_write_mutex);
+            }
             m_cv_not_full.notify_one();
             return result;
         }
 
+
+
+        //blocking pop, sleeps under m_read_mutex
         [[nodiscard]] T pop() {
-            std::unique_lock lock(m_read_mutex);
-            m_cv_not_empty.wait(lock, [this] {
-                m_write_head_cache = m_write_head.load(std::memory_order_acquire);
-                return m_read_head.load(std::memory_order_relaxed) != m_write_head_cache;
-            });
+            std::optional<T> result;
 
-            const std::size_t current_read = m_read_head.load(std::memory_order_relaxed);
-            const std::size_t slot = current_read & (SIZE - 1);
-            T *item = reinterpret_cast<T *>(&m_data[slot].storage);
-            T result = std::move(*item);
-            std::destroy_at(item);
-            m_read_head.store(current_read + 1, std::memory_order_release);
-            lock.unlock();
+            {
+                std::unique_lock rlock(m_read_mutex);
+                m_cv_not_empty.wait(rlock, [this] {
+                    m_write_head_cache = m_write_head.load(std::memory_order_acquire);
+                    return m_read_head.load(std::memory_order_relaxed) !=
+                           m_write_head_cache;
+                });
 
-            // Wake exactly one sleeping producer
+                const std::size_t cur = m_read_head.load(std::memory_order_relaxed);
+                T *item = reinterpret_cast<T *>(&m_data[cur & (SIZE - 1)].storage);
+                result = std::move(*item);
+                std::destroy_at(item);
+                m_read_head.store(cur + 1, std::memory_order_release);
+            }
+
+            {
+                std::lock_guard wlock(m_write_mutex);
+            }
             m_cv_not_full.notify_one();
-            return result;
+            return std::move(*result);
         }
 
         [[nodiscard]] static constexpr std::size_t capacity() noexcept { return SIZE; }

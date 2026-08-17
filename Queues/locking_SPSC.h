@@ -42,9 +42,26 @@ namespace tstl::locking {
             T *item = reinterpret_cast<T *>(&m_data[slot].storage);
             std::construct_at(item, std::forward<Args>(args)...);
             m_write_head = current_write + 1;
+            lock.unlock();
+            m_cv_not_empty.notify_one();
             return true;
         }
 
+        template<typename... Args>
+        void emplace(Args &&...args) {
+            std::unique_lock lock(m_mutex);
+            m_cv_not_full.wait(lock, [this] { return m_write_head - m_read_head < SIZE; });
+
+            const std::size_t slot = m_write_head & (SIZE - 1);
+            T *item = reinterpret_cast<T *>(&m_data[slot].storage);
+            std::construct_at(item, std::forward<Args>(args)...);
+            m_write_head++;
+
+            lock.unlock();
+            m_cv_not_empty.notify_one();
+        }
+
+        // Blocking variants
         [[nodiscard]] std::optional<T> try_pop() {
             std::unique_lock lock(m_mutex, std::try_to_lock);
             if (TSTL_UNLIKELY(!lock.owns_lock())) {
@@ -60,18 +77,14 @@ namespace tstl::locking {
             T *item = reinterpret_cast<T *>(&m_data[slot].storage);
             T result = std::move(*item);
             std::destroy_at(item);
+
             m_read_head = current_read + 1;
+
+            lock.unlock();
+            m_cv_not_full.notify_one();
             return result;
         }
 
-        // Blocking variants
-        template<typename... Args>
-        void emplace(Args &&...args) {
-            while (!try_emplace(std::forward<Args>(args)...)) {
-                m_cv_not_full.wait(std::unique_lock(m_mutex), [this] { return m_write_head - m_read_head < SIZE; });
-            }
-            m_cv_not_empty.notify_one();
-        }
 
         [[nodiscard]] T pop() {
             std::unique_lock lock(m_mutex);

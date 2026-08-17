@@ -30,35 +30,58 @@ namespace tstl::locking {
             {
                 std::lock_guard lock(m_write_mutex);
 
-                if (TSTL_UNLIKELY(m_write_head - m_read_head_cache >= SIZE)) {
-                    // Refresh cached view of the read head
+                const std::size_t current_write = m_write_head.load(std::memory_order_relaxed);
+
+                if (TSTL_UNLIKELY(current_write - m_read_head_cache >= SIZE)) {
                     m_read_head_cache = m_read_head.load(std::memory_order_acquire);
-                    if (m_write_head - m_read_head_cache >= SIZE) {
-                        return false; // still full
+                    if (current_write - m_read_head_cache >= SIZE) {
+                        return false; // full
                     }
                 }
 
-                const std::size_t slot = m_write_head & (SIZE - 1);
+                const std::size_t slot = current_write & (SIZE - 1);
                 T *item = reinterpret_cast<T *>(&m_data[slot].storage);
                 std::construct_at(item, std::forward<Args>(args)...);
-                m_write_head.store(m_write_head.load(std::memory_order_relaxed) + 1, std::memory_order_release);
+                m_write_head.store(current_write + 1, std::memory_order_release);
+            }
+            //notify under m_read_mutex so consumer's condvar predicate check and his notification are
+            //mutually exclusive
+            {
+                std::lock_guard rlock(m_read_mutex);
             }
             m_cv_not_empty.notify_one();
             return true;
         }
 
+
         template<typename... Args>
         void emplace(Args &&...args) {
-            // Spin-wait if full — producers don't sleep on a condvar here
-            // because waking them correctly without data races requires the
-            // consumer to hold m_write_mutex, which would kill parallelism.
-            while (!try_emplace(std::forward<Args>(args)...)) {
-                std::this_thread::yield();
+            {
+                std::unique_lock wlock(m_write_mutex);
+                m_cv_not_full.wait(wlock, [this] {
+                    // acquire here so we see consumer's release-store to m_read_head
+                    m_read_head_cache = m_read_head.load(std::memory_order_acquire);
+                    return m_write_head.load(std::memory_order_relaxed) -
+                               m_read_head_cache < SIZE;
+                });
+
+                const std::size_t cur = m_write_head.load(std::memory_order_relaxed);
+                std::construct_at(reinterpret_cast<T *>(&m_data[cur & (SIZE - 1)].storage),
+                                  std::forward<Args>(args)...);
+                m_write_head.store(cur + 1, std::memory_order_release);
+            }
+
+            {
+                std::lock_guard rlock(m_read_mutex);
             }
             m_cv_not_empty.notify_one();
         }
 
+
+        //non-blocking pop, returns nullopt if empty
+        //MPSC has single consumer so no contention on the read side
         [[nodiscard]] std::optional<T> try_pop() {
+            std::optional<T> result;
             const std::size_t current_read = m_read_head.load(std::memory_order_relaxed);
 
             if (TSTL_UNLIKELY(current_read == m_write_head_cache)) {
@@ -70,23 +93,25 @@ namespace tstl::locking {
 
             const std::size_t slot = current_read & (SIZE - 1);
             T *item = reinterpret_cast<T *>(&m_data[slot].storage);
-            T result = std::move(*item);
+            result = std::move(*item);
             std::destroy_at(item);
-            // Release so producers see the freed slot
+
             m_read_head.store(current_read + 1, std::memory_order_release);
+
+            {
+                std::lock_guard wlock(m_write_mutex);
+            }
+            m_cv_not_full.notify_one();
             return result;
         }
 
         [[nodiscard]] T pop() {
-            // Fast path
-            if (auto val = try_pop()) {
-                return std::move(*val);
-            }
-            // Slow path
             std::unique_lock lock(m_read_mutex);
             m_cv_not_empty.wait(lock, [this] {
-                return m_read_head.load(std::memory_order_relaxed) != m_write_head.load(std::memory_order_acquire);
+                m_write_head_cache = m_write_head.load(std::memory_order_acquire);
+                return m_read_head.load(std::memory_order_relaxed) != m_write_head_cache;
             });
+
             lock.unlock();
             return std::move(*try_pop());
         }
@@ -103,6 +128,7 @@ namespace tstl::locking {
 
         // Producer's line
         alignas(detail::CACHE_LINE_SIZE) std::mutex m_write_mutex;
+        std::condition_variable m_cv_not_full;
         std::atomic<std::size_t> m_write_head{0};
         std::size_t m_read_head_cache{0};
 
