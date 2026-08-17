@@ -44,8 +44,8 @@ namespace tstl::locking {
                 std::construct_at(item, std::forward<Args>(args)...);
                 m_write_head.store(current_write + 1, std::memory_order_release);
             }
-            //notify under m_read_mutex so consumer's condvar predicate check and his notification are
-            //mutually exclusive
+            // notify under m_read_mutex so consumer's condvar predicate check and his notification are
+            // mutually exclusive
             {
                 std::lock_guard rlock(m_read_mutex);
             }
@@ -61,8 +61,7 @@ namespace tstl::locking {
                 m_cv_not_full.wait(wlock, [this] {
                     // acquire here so we see consumer's release-store to m_read_head
                     m_read_head_cache = m_read_head.load(std::memory_order_acquire);
-                    return m_write_head.load(std::memory_order_relaxed) -
-                               m_read_head_cache < SIZE;
+                    return m_write_head.load(std::memory_order_relaxed) - m_read_head_cache < SIZE;
                 });
 
                 const std::size_t cur = m_write_head.load(std::memory_order_relaxed);
@@ -78,8 +77,8 @@ namespace tstl::locking {
         }
 
 
-        //non-blocking pop, returns nullopt if empty
-        //MPSC has single consumer so no contention on the read side
+        // non-blocking pop, returns nullopt if empty
+        // MPSC has single consumer so no contention on the read side
         [[nodiscard]] std::optional<T> try_pop() {
             std::optional<T> result;
             const std::size_t current_read = m_read_head.load(std::memory_order_relaxed);
