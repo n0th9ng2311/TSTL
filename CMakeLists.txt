@@ -24,11 +24,9 @@ add_library(TSTL_P STATIC
         common/macros.h
         Queues/SPSC_A.h
         Queues/MPSC.h
+        Queues/locking_MPSC.h
+        Queues/locking_MPMC.h
         Queues/locking_SPSC.h
-        Queues/locking_MPSC.h
-        Queues/locking_MPSC.h
-        Queues/locking_MPMC.h
-        Queues/locking_MPMC.h
 )
 
 target_include_directories(TSTL_P PUBLIC
