@@ -61,7 +61,7 @@ TYPED_TEST_P(Locking_basic_pattern, FullBoundaryTest) {
     for (std::size_t i{0}; i < this->queue.capacity(); ++i) {
         EXPECT_TRUE(this->queue.try_emplace(T{}));
     }
-    //should fail
+    // should fail
     EXPECT_FALSE(this->queue.try_emplace(T{}));
 }
 
