@@ -2,8 +2,8 @@
 #include <cassert>
 #include <nanobench.h>
 
-#include "../../Queues/MPSC.h"
-#include "../../common/common_headers.h"
+#include "tstl/Queues/MPSC.h"
+#include "tstl/common/common_headers.h"
 
 #define BENCH_DO_NOT_OPTIMIZE(expr) ankerl::nanobench::doNotOptimizeAway(expr)
 

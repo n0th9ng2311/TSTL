@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-#include "../../Queues/SPSC.h"
-#include "../../Queues/SPSC_A.h"
-#include "../../common/common_headers.h"
+#include "tstl/Queues/SPSC.h"
+#include "tstl/Queues/SPSC_A.h"
+#include "tstl/common/common_headers.h"
 
 template<typename ConcreteQueue, typename Element>
 struct TestBundle {

@@ -1,0 +1,18 @@
+{
+  "name": "tstl",
+  "version": "0.1.0",
+  "description": "A library containing thread safe read and write data structures",
+  "homepage": "https://github.com/n0th9ng2311/TSTL",
+  "license": "MIT",
+  "supports": "!uwp",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ]
+}

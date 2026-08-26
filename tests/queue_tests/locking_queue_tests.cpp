@@ -4,10 +4,10 @@
 #include <numeric>
 #include <thread>
 #include <vector>
-#include "../../Queues/locking_MPMC.h"
-#include "../../Queues/locking_MPSC.h"
-#include "../../Queues/locking_SPSC.h"
-#include "../../common/common_headers.h"
+#include "../../include/tstl/Queues/locking_MPMC.h"
+#include "tstl/Queues/locking_MPSC.h"
+#include "tstl/Queues/locking_SPSC.h"
+#include "tstl/common/common_headers.h"
 
 // TestBundle — same as the SPSC test file
 template<typename ConcreteQueue, typename Element>

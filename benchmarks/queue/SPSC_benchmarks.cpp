@@ -1,7 +1,7 @@
 #define ANKERL_NANOBENCH_IMPLEMENT
 #include <nanobench.h>
-#include "../../Queues/SPSC.h"
-#include "../../Queues/SPSC_A.h"
+#include "tstl/Queues/SPSC.h"
+#include "tstl/Queues/SPSC_A.h"
 
 #define BENCH_DO_NOT_OPTIMIZE(expr) ankerl::nanobench::doNotOptimizeAway(expr)
 
