@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.1)
+cmake_minimum_required(VERSION 3.24)
 
 file(TO_CMAKE_PATH "{MY_UTILS}" UTILS_DIR)
 include("/init.cmake" OPTIONAL)
