@@ -108,7 +108,7 @@ namespace tstl {
                 if constexpr (alignof(U) > __STDCPP_DEFAULT_NEW_ALIGNMENT__) {
                     ::operator delete(p, n * sizeof(U), std::align_val_t{alignof(U)});
                 } else {
-                    ::operator delete(p, n * sizeof(U));
+                    ::operator delete(p);
                 }
             }
 

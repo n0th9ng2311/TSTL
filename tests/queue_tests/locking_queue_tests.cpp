@@ -4,7 +4,7 @@
 #include <numeric>
 #include <thread>
 #include <vector>
-#include "../../include/tstl/Queues/locking_MPMC.h"
+#include "tstl/Queues/locking_MPMC.h"
 #include "tstl/Queues/locking_MPSC.h"
 #include "tstl/Queues/locking_SPSC.h"
 #include "tstl/common/common_headers.h"
