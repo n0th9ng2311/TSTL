@@ -59,11 +59,11 @@ namespace tstl::locking {
             {
                 std::unique_lock wlock(m_write_mutex);
                 m_cv_not_full.wait(wlock, [this] {
-                    m_read_head_cache = m_read_head.load(std::memory_order_relaxed);
+                    m_read_head_cache = m_read_head.load(std::memory_order_acquire);
                     return m_write_head.load(std::memory_order_relaxed) - m_read_head_cache < SIZE;
                 });
 
-                const std::size_t cur = m_write_head.load(std::memory_order_acquire);
+                const std::size_t cur = m_write_head.load(std::memory_order_relaxed);
                 T *item = reinterpret_cast<T *>(&m_data[cur & (SIZE - 1)].storage);
                 std::construct_at(item, std::forward<Args>(args)...);
                 m_write_head.store(cur + 1, std::memory_order_release);
