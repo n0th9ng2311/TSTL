@@ -63,7 +63,7 @@ namespace tstl::locking {
                     return m_write_head.load(std::memory_order_relaxed) - m_read_head_cache < SIZE;
                 });
 
-                const std::size_t cur = m_write_head.load(std::memory_order_relaxed);
+                const std::size_t cur = m_write_head.load(std::memory_order_acquire);
                 T *item = reinterpret_cast<T *>(&m_data[cur & (SIZE - 1)].storage);
                 std::construct_at(item, std::forward<Args>(args)...);
                 m_write_head.store(cur + 1, std::memory_order_release);
