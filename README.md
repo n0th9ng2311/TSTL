@@ -6,6 +6,7 @@
 - [Overview](#overview)
 - [Key features](#key-features)
 - [Integration](#integration)
+- [AI Disclosure](#ai-disclosure)
 
 ---
 
@@ -124,3 +125,8 @@ This project is licensed under the ``MIT License``
 *Disclaimer: TSTL is a personal engineering project. I designed it to be fast and safe, 
 but it's still a work in progress. Use it at your own risk, and definitely write tests for 
 your specific use cases!*
+
+---
+
+## AI Disclosure
+Please note that LLM has been used to help draft the documentation although all of that is reviewed by me
